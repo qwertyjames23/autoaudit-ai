@@ -869,6 +869,7 @@ function renderReport(data) {
     card.className = 'opp-card';
     card.style.animationDelay = `${i * 0.1}s`;
     const tools = (opp.tools || []).map(t => `<span class="tool-badge">${t}</span>`).join('');
+    const oppData = encodeURIComponent(JSON.stringify(opp));
     card.innerHTML = `
       <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -878,12 +879,44 @@ function renderReport(data) {
         <span class="time-badge" style="flex-shrink:0;">${opp.timeSaved || '—'}</span>
       </div>
       <p style="font-size:13.5px; color:var(--muted); line-height:1.65; margin-bottom:12px; padding-left:38px;">${escHtml(opp.solution || 'This can be automated.')}</p>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; padding-left:38px;">${tools}</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; padding-left:38px; margin-bottom:14px;">${tools}</div>
+      <div style="padding-left:38px;">
+        <button onclick="buildThis('${oppData}')"
+          style="font-size:13px; font-weight:600; color:var(--amber); background:var(--amber-light); border:1.5px solid rgba(217,119,6,0.25); padding:8px 16px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
+          onmouseover="this.style.background='#fde68a'; this.style.borderColor='var(--amber)';"
+          onmouseout="this.style.background='var(--amber-light)'; this.style.borderColor='rgba(217,119,6,0.25)';">
+          Build This →
+        </button>
+      </div>
     `;
     list.appendChild(card);
   });
 
   document.getElementById('cta-bar').classList.add('visible');
+}
+
+function buildThis(oppDataEncoded) {
+  const opp = JSON.parse(decodeURIComponent(oppDataEncoded));
+  const tools = (opp.tools || []).join(', ');
+  const message = `Hi Raffy, I just ran the AutoAudit tool and I want you to build this for me:\n\n📌 ${opp.pain}\n💡 ${opp.solution}\n🛠 Tools: ${tools}\n⏱ Estimated savings: ${opp.timeSaved}`;
+
+  // Send to Formspree
+  fetch('https://formspree.io/f/myklgkwp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name:               state.name,
+      email:              state.email,
+      selected_opportunity: opp.pain,
+      solution:           opp.solution,
+      tools:              tools,
+      time_saved:         opp.timeSaved,
+      type:               'opportunity_selected'
+    })
+  }).catch(() => {});
+
+  // Open WhatsApp
+  window.open(`https://wa.me/639975688363?text=${encodeURIComponent(message)}`, '_blank');
 }
 
 function showError() {
