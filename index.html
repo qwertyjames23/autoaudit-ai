@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoAudit — Free AI Automation Audit for Your Business</title>
+  <meta name="description" content="Describe your workflow and get a free AI-powered audit showing exactly where automation can save you hours every week.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --border2: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --muted2: #94a3b8;
+      --amber: #d97706;
+      --amber-soft: #f59e0b;
+      --amber-light: #fef3c7;
+      --amber-bg: #fffbeb;
+      --green: #059669;
+      --green-light: #d1fae5;
+      --blue: #2563eb;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--amber);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .header-link {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .header-link:hover { color: var(--text); }
+
+    /* ===== PROGRESS ===== */
+    .progress-wrap {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px 14px;
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      flex-shrink: 0;
+      transition: all 0.3s;
+      border: 2px solid var(--border2);
+      color: var(--muted2);
+      background: var(--white);
+    }
+    .step-dot.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: white;
+    }
+    .step-dot.done {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .step-line.done { background: var(--green); }
+
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 8px auto 0;
+    }
+    .step-label {
+      font-size: 10.5px;
+      color: var(--muted2);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      flex: 1;
+      transition: color 0.3s;
+    }
+    .step-label.active { color: var(--amber); }
+    .step-label.done { color: var(--green); }
+
+    /* ===== LAYOUT ===== */
+    .main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 24px 120px;
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* Option cards */
+    .option-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .option-card:hover {
+      border-color: var(--amber-soft);
+      background: var(--amber-bg);
+    }
+    .option-card.selected {
+      border-color: var(--amber);
+      background: var(--amber-light);
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.1);
+    }
+    .option-card .label {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text);
+      margin-top: 6px;
+    }
+    .option-card.selected .label { color: var(--amber); }
+
+    /* ===== INPUTS ===== */
+    .input-field {
+      width: 100%;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.12);
+    }
+    .input-field::placeholder { color: var(--muted2); }
+    textarea.input-field { resize: vertical; min-height: 160px; }
+
+    /* ===== BUTTONS ===== */
+    .btn-primary {
+      background: var(--amber);
+      color: white;
+      font-weight: 600;
+      font-size: 14.5px;
+      padding: 13px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--amber-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(217,119,6,0.3);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 0;
+      border: none;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    /* ===== STEPS ===== */
+    .step { display: none; }
+    .step.active {
+      display: block;
+      animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== LABELS ===== */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--amber);
+      background: var(--amber-light);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(217,119,6,0.2);
+      margin-bottom: 14px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 10px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    /* ===== LOADING ===== */
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--amber);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40%            { opacity: 1;   transform: scale(1); }
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 0.85em;
+      background: var(--amber);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ===== REPORT ===== */
+    .opp-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      opacity: 0;
+      animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .opp-card:hover {
+      border-color: var(--amber-soft);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tool-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      background: #f1f5f9;
+      border: 1px solid var(--border2);
+      color: #475569;
+    }
+
+    .time-badge {
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: var(--green-light);
+      border: 1px solid rgba(5,150,105,0.2);
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .num-badge {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--amber-light);
+      border: 1px solid rgba(217,119,6,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--amber);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    /* ===== STICKY CTA ===== */
+    #cta-bar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 14px 24px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+      animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #cta-bar.visible { display: flex; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    /* ===== MISC ===== */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      border: none;
+      margin: 24px 0;
+    }
+
+    .hint-pill {
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--white);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .hint-pill:hover {
+      border-color: var(--amber-soft);
+      color: var(--amber);
+      background: var(--amber-bg);
+    }
+
+    .char-ok    { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .char-pending { color: var(--muted2); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #dc2626;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Free badge */
+    .free-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid rgba(5,150,105,0.2);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </div>
+      <span class="logo-text">AutoAudit.AI</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="free-badge">100% Free</span>
+      <a href="https://raffy-portfolio.netlify.app" target="_blank" rel="noopener" class="header-link">by Raffy Adams ↗</a>
+    </div>
+  </header>
+
+  <!-- ===== PROGRESS ===== -->
+  <div class="progress-wrap">
+    <div class="progress-steps" id="progress-steps">
+      <div class="step-dot active" id="dot-1">1</div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-dot" id="dot-2">2</div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step-dot" id="dot-3">3</div>
+      <div class="step-line" id="line-3"></div>
+      <div class="step-dot" id="dot-4">4</div>
+    </div>
+    <div class="step-labels">
+      <span class="step-label active" id="label-1">Context</span>
+      <span class="step-label" id="label-2">Workflow</span>
+      <span class="step-label" id="label-3">Unlock</span>
+      <span class="step-label" id="label-4">Results</span>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- ==============================
+         STEP 1: Business Context
+         ============================== -->
+    <div id="step-1" class="step active">
+
+      <div style="margin-bottom:32px;">
+        <div class="tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          STEP 01
+        </div>
+        <h1 style="font-family:'Bebas Neue',cursive; font-size:clamp(2.6rem,8vw,4rem); line-height:1; color:var(--text); margin-bottom:12px; letter-spacing:0.01em;">
+          Find Your<br><span style="color:var(--amber);">Automation Wins</span>
+        </h1>
+        <p style="font-size:15px; color:var(--muted); line-height:1.65; max-width:420px;">
+          Tell us about your business and we'll show you exactly where AI automation can save you hours every week — for free.
+        </p>
+      </div>
+
+      <!-- Industry -->
+      <div style="margin-bottom:24px;">
+        <p class="section-label">What type of business do you run?</p>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;" id="industry-grid"></div>
+      </div>
+
+      <!-- Team size -->
+      <div style="margin-bottom:32px;">
+        <p class="section-label">Team size</p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="teamsize-grid"></div>
+      </div>
+
+      <button id="step1-next" class="btn-primary" disabled>
+        Continue <span>→</span>
+      </button>
+    </div>
+
+    <!-- ==============================
+         STEP 2: Workflow
+         ============================== -->
+    <div id="step-2" class="step">
+
+      <div style="margin-bottom:28px;">
+        <button class="btn-ghost" onclick="goToStep(1)" style="margin-bottom:16px;">← back</button>
+        <div class="tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          STEP 02
+        </div>
+        <h2 style="font-family:'Bebas Neue',cursive; font-size:clamp(2.4rem,7vw,3.6rem); line-height:1; color:var(--text); margin-bottom:12px; letter-spacing:0.01em;">
+          Describe Your<br><span style="color:var(--amber);">Daily Process</span>
+        </h2>
+        <p style="font-size:14px; color:var(--muted); line-height:1.6; max-width:400px;">
+          Be specific — the more detail you give, the more accurate your automation audit will be.
+        </p>
+      </div>
+
+      <!-- Hint pills -->
+      <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px;">
+        <span class="hint-pill" onclick="injectHint('I manually send invoice emails every time a customer orders, then update a spreadsheet...')">💡 invoices</span>
+        <span class="hint-pill" onclick="injectHint('Every week I copy customer data from Facebook messages into a Google Sheet...')">💡 data entry</span>
+        <span class="hint-pill" onclick="injectHint('My team manually follows up with leads via email 3–5 days after they contact us...')">💡 follow-ups</span>
+        <span class="hint-pill" onclick="injectHint('I spend 2 hours every Monday creating social media posts for the week...')">💡 social media</span>
+      </div>
+
+      <textarea
+        id="workflow-input"
+        class="input-field"
+        placeholder="e.g. Every morning I check Facebook messages for new orders, manually type them into a spreadsheet, then message my supplier on Viber. I also update customers manually when their orders ship, which takes about 2 hours a day..."
+        oninput="onWorkflowInput()"
+      ></textarea>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:28px;">
+        <span id="char-counter" class="char-pending">0 / 50 min</span>
+        <span style="font-size:12px; color:var(--muted2);">🔒 Not stored or shared</span>
+      </div>
+
+      <button id="step2-next" class="btn-primary" disabled>
+        Get My Audit <span>→</span>
+      </button>
+    </div>
+
+    <!-- ==============================
+         STEP 3: Lead Capture
+         ============================== -->
+    <div id="step-3" class="step">
+
+      <div style="margin-bottom:28px;">
+        <button class="btn-ghost" onclick="goToStep(2)" style="margin-bottom:16px;">← back</button>
+        <div class="tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          STEP 03
+        </div>
+        <h2 style="font-family:'Bebas Neue',cursive; font-size:clamp(2.4rem,7vw,3.6rem); line-height:1; color:var(--text); margin-bottom:12px; letter-spacing:0.01em;">
+          Almost There<span style="color:var(--amber);">.</span>
+        </h2>
+        <p style="font-size:14px; color:var(--muted); line-height:1.6; max-width:380px;">
+          Enter your details to unlock your personalized automation report.
+        </p>
+      </div>
+
+      <div class="card" style="padding:28px;">
+        <form id="lead-form" onsubmit="submitLead(event)">
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px;">Your name</label>
+            <input type="text" id="lead-name" class="input-field" placeholder="Jane Smith" required autocomplete="name">
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px;">Work email</label>
+            <input type="email" id="lead-email" class="input-field" placeholder="jane@yourbusiness.com" required autocomplete="email">
+          </div>
+
+          <div style="display:flex; align-items:flex-start; gap:8px; padding:12px 14px; background:#f8fafc; border:1px solid var(--border); border-radius:8px; margin-bottom:20px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" style="margin-top:1px; flex-shrink:0;">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span style="font-size:12.5px; color:var(--muted); line-height:1.5;">No spam. I'll only reach out if you'd like help implementing these automations.</span>
+          </div>
+
+          <button type="submit" id="step3-submit" class="btn-primary" style="width:100%; justify-content:center;">
+            Generate My Free Report →
+          </button>
+        </form>
+      </div>
+
+      <div id="step3-error" class="error-box" style="display:none; margin-top:14px;"></div>
+    </div>
+
+    <!-- ==============================
+         STEP 4: Report
+         ============================== -->
+    <div id="step-4" class="step">
+
+      <!-- Loading -->
+      <div id="loading-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 0; text-align:center;">
+        <div style="width:56px; height:56px; background:var(--amber-light); border-radius:16px; display:flex; align-items:center; justify-content:center; margin-bottom:24px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <p style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--amber); margin-bottom:6px;">
+          <span id="loading-text">Analyzing your workflow</span><span class="cursor"></span>
+        </p>
+        <p style="font-size:12px; color:var(--muted2);">Takes about 15 seconds</p>
+      </div>
+
+      <!-- Report -->
+      <div id="report-state" style="display:none;">
+
+        <div style="margin-bottom:28px;">
+          <div class="tag">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            YOUR REPORT
+          </div>
+          <h2 style="font-family:'Bebas Neue',cursive; font-size:clamp(2.4rem,7vw,3.6rem); line-height:1; color:var(--text); margin-bottom:20px; letter-spacing:0.01em;">
+            Automation Audit<span style="color:var(--amber);">.</span>
+          </h2>
+
+          <!-- Summary card -->
+          <div class="card" style="padding:20px 22px; border-left:4px solid var(--amber); margin-bottom:16px;">
+            <p id="report-summary" style="font-size:15px; color:var(--text); line-height:1.7;"></p>
+          </div>
+
+          <!-- Total time saved -->
+          <div style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--green-light); border:1px solid rgba(5,150,105,0.2); border-radius:12px; margin-bottom:24px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            <div>
+              <p style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--green); margin-bottom:2px;">TOTAL TIME SAVED</p>
+              <p id="total-time-saved" style="font-family:'Bebas Neue',cursive; font-size:1.6rem; color:var(--green); letter-spacing:0.02em;">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opportunity cards -->
+        <div id="opportunities-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:28px;"></div>
+
+        <!-- Bottom CTA card -->
+        <div class="card" style="padding:28px; text-align:center; border:2px solid var(--amber-soft);">
+          <div style="width:48px; height:48px; background:var(--amber-light); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.49 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.51a16 16 0 0 0 6.29 6.29l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <h3 style="font-family:'Bebas Neue',cursive; font-size:1.8rem; color:var(--text); margin-bottom:8px; letter-spacing:0.02em;">Ready to Implement This?</h3>
+          <p style="font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.6; max-width:320px; margin-left:auto; margin-right:auto;">
+            I build custom automations for businesses like yours. Most clients save 10–40 hours per week.
+          </p>
+          <a href="https://wa.me/639975688363?text=Hi%20Raffy%2C%20I%20just%20ran%20the%20AutoAudit%20tool%20and%20I%27d%20like%20to%20discuss%20automating%20my%20business%20workflow."
+             target="_blank" rel="noopener"
+             class="btn-primary" style="text-decoration:none; display:inline-flex;">
+            💬 Chat on WhatsApp →
+          </a>
+        </div>
+
+        <!-- Error fallback -->
+        <div id="report-error" class="error-box" style="display:none; margin-top:20px;">
+          <p style="font-weight:600; margin-bottom:6px;">Couldn't generate your report automatically.</p>
+          <p>Message me on <a href="https://wa.me/639975688363" target="_blank" style="color:var(--amber); text-decoration:underline;">WhatsApp</a> — I'll audit your workflow personally, for free.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== STICKY CTA ===== -->
+  <div id="cta-bar">
+    <div>
+      <p style="font-size:13.5px; font-weight:600; color:var(--text); margin-bottom:2px;">Want this actually built?</p>
+      <p style="font-size:12px; color:var(--muted);">Custom automations · avg. 10–40 hrs/week saved · free consult</p>
+    </div>
+    <a href="https://wa.me/639975688363?text=Hi%20Raffy%2C%20I%20just%20ran%20the%20AutoAudit%20tool%20and%20I%27d%20like%20to%20discuss%20automating%20my%20business%20workflow."
+       target="_blank" rel="noopener"
+       class="btn-primary" style="text-decoration:none; white-space:nowrap; flex-shrink:0;">
+      💬 Book Free Consultation →
+    </a>
+  </div>
+
+<script>
+// ===== STATE =====
+const state = { industry: null, teamSize: null, workflow: '', name: '', email: '' };
+let currentStep = 1;
+
+const INDUSTRIES = [
+  { id: 'ecommerce',  label: 'E-Commerce',      icon: '🛒' },
+  { id: 'restaurant', label: 'Restaurant / F&B', icon: '🍽️' },
+  { id: 'agency',     label: 'Agency',            icon: '🎯' },
+  { id: 'freelancer', label: 'Freelancer',         icon: '💻' },
+  { id: 'realestate', label: 'Real Estate',        icon: '🏠' },
+  { id: 'other',      label: 'Other',              icon: '⚡' },
+];
+const TEAM_SIZES = [
+  { id: 'solo', label: 'Solo' },
+  { id: '2-5',  label: '2–5' },
+  { id: '6-20', label: '6–20' },
+  { id: '20+',  label: '20+' },
+];
+const LOADING_MSGS = [
+  'Analyzing your workflow',
+  'Identifying manual bottlenecks',
+  'Matching automation tools',
+  'Calculating time savings',
+  'Building your report'
+];
+
+// ===== INIT =====
+(function init() {
+  document.getElementById('industry-grid').innerHTML = INDUSTRIES.map(i => `
+    <div class="option-card" data-group="industry" data-id="${i.id}" onclick="pick('industry','${i.id}',this)">
+      <div style="font-size:22px;">${i.icon}</div>
+      <div class="label">${i.label}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('teamsize-grid').innerHTML = TEAM_SIZES.map(t => `
+    <div class="option-card" data-group="teamsize" data-id="${t.id}" style="padding:11px 24px;" onclick="pick('teamSize','${t.id}',this)">
+      <span class="label" style="font-family:'JetBrains Mono',monospace; font-size:13px; margin-top:0;">${t.label}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('step1-next').addEventListener('click', () => goToStep(2));
+  document.getElementById('step2-next').addEventListener('click', () => goToStep(3));
+})();
+
+// ===== PICK =====
+function pick(key, id, el) {
+  document.querySelectorAll(`[data-group="${el.dataset.group}"]`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key] = id;
+  document.getElementById('step1-next').disabled = !(state.industry && state.teamSize);
+}
+
+// ===== WORKFLOW =====
+function onWorkflowInput() {
+  const val = document.getElementById('workflow-input').value;
+  state.workflow = val;
+  const len = val.trim().length;
+  const c = document.getElementById('char-counter');
+  if (len < 50) {
+    c.textContent = `${len} / 50 min`;
+    c.className = 'char-pending';
+  } else {
+    c.textContent = `${len} chars ✓`;
+    c.className = 'char-ok';
+  }
+  document.getElementById('step2-next').disabled = len < 50;
+}
+
+function injectHint(text) {
+  const ta = document.getElementById('workflow-input');
+  ta.value = text;
+  ta.focus();
+  onWorkflowInput();
+}
+
+// ===== NAVIGATION =====
+function goToStep(n) {
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  document.getElementById(`step-${n}`).classList.add('active');
+
+  // Update dots
+  for (let i = 1; i <= 4; i++) {
+    const dot   = document.getElementById(`dot-${i}`);
+    const label = document.getElementById(`label-${i}`);
+    dot.className   = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+    label.className = 'step-label' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (i < 4) {
+      document.getElementById(`line-${i}`).className = 'step-line' + (i < n ? ' done' : '');
+    }
+    // Replace number with checkmark for done steps
+    dot.textContent = i < n ? '✓' : String(i);
+  }
+
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== LEAD SUBMIT =====
+async function submitLead(e) {
+  e.preventDefault();
+  state.name  = document.getElementById('lead-name').value.trim();
+  state.email = document.getElementById('lead-email').value.trim();
+
+  const btn = document.getElementById('step3-submit');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  // Fire and forget
+  fetch('https://formspree.io/f/myklgkwp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: state.name, email: state.email, industry: state.industry, teamSize: state.teamSize, workflow: state.workflow })
+  }).catch(() => {});
+
+  goToStep(4);
+  runAnalysis();
+}
+
+// ===== ANALYSIS =====
+async function runAnalysis() {
+  let idx = 0;
+  const loadingText = document.getElementById('loading-text');
+  const timer = setInterval(() => {
+    idx = (idx + 1) % LOADING_MSGS.length;
+    loadingText.textContent = LOADING_MSGS[idx];
+  }, 2800);
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ industry: state.industry, teamSize: state.teamSize, workflow: state.workflow, name: state.name })
+    });
+    clearInterval(timer);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderReport(data);
+  } catch (err) {
+    clearInterval(timer);
+    console.error(err);
+    showError();
+  }
+}
+
+// ===== RENDER =====
+function renderReport(data) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('report-state').style.display  = 'block';
+  document.getElementById('report-summary').textContent   = data.summary || 'Here are your automation opportunities.';
+  document.getElementById('total-time-saved').textContent = data.totalTimeSaved || 'N/A';
+
+  const list = document.getElementById('opportunities-list');
+  list.innerHTML = '';
+  (data.opportunities || []).forEach((opp, i) => {
+    const card = document.createElement('div');
+    card.className = 'opp-card';
+    card.style.animationDelay = `${i * 0.1}s`;
+    const tools = (opp.tools || []).map(t => `<span class="tool-badge">${t}</span>`).join('');
+    card.innerHTML = `
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="num-badge">${String(i+1).padStart(2,'0')}</div>
+          <h3 style="font-size:14.5px; font-weight:600; color:var(--text); line-height:1.4;">${escHtml(opp.pain || 'Manual process identified')}</h3>
+        </div>
+        <span class="time-badge" style="flex-shrink:0;">${opp.timeSaved || '—'}</span>
+      </div>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.65; margin-bottom:12px; padding-left:38px;">${escHtml(opp.solution || 'This can be automated.')}</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; padding-left:38px;">${tools}</div>
+    `;
+    list.appendChild(card);
+  });
+
+  document.getElementById('cta-bar').classList.add('visible');
+}
+
+function showError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('report-state').style.display  = 'block';
+  document.getElementById('report-error').style.display  = 'block';
+  document.getElementById('cta-bar').classList.add('visible');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
