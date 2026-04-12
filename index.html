@@ -664,24 +664,27 @@
         </div>
 
         <!-- Opportunity cards -->
-        <div id="opportunities-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:28px;"></div>
+        <div id="opportunities-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;"></div>
+
+        <!-- Select hint -->
+        <p id="select-hint" style="font-size:13px; color:var(--muted); margin-bottom:16px; display:none;">
+          👆 Select an opportunity above, then click <strong>Book Free Consultation</strong>.
+        </p>
 
         <!-- Bottom CTA card -->
         <div class="card" style="padding:28px; text-align:center; border:2px solid var(--amber-soft);">
           <div style="width:48px; height:48px; background:var(--amber-light); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.49 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.51a16 16 0 0 0 6.29 6.29l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
             </svg>
           </div>
           <h3 style="font-family:'Bebas Neue',cursive; font-size:1.8rem; color:var(--text); margin-bottom:8px; letter-spacing:0.02em;">Ready to Implement This?</h3>
           <p style="font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.6; max-width:320px; margin-left:auto; margin-right:auto;">
-            I build custom automations for businesses like yours. Most clients save 10–40 hours per week.
+            Select which automation you want built above, then book a free consultation.
           </p>
-          <a href="https://wa.me/639975688363?text=Hi%20Raffy%2C%20I%20just%20ran%20the%20AutoAudit%20tool%20and%20I%27d%20like%20to%20discuss%20automating%20my%20business%20workflow."
-             target="_blank" rel="noopener"
-             class="btn-primary" style="text-decoration:none; display:inline-flex;">
-            💬 Chat on WhatsApp →
-          </a>
+          <button id="book-consult-btn" onclick="bookConsultation()" class="btn-primary" disabled style="opacity:0.4; cursor:not-allowed;">
+            Book Free Consultation →
+          </button>
         </div>
 
         <!-- Error fallback -->
@@ -694,6 +697,24 @@
     </div>
 
   </main>
+
+  <!-- ===== SUCCESS MODAL ===== -->
+  <div id="success-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; padding:24px;">
+    <div style="background:white; border-radius:20px; padding:36px 32px; max-width:400px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.2); animation:fadeUp 0.3s cubic-bezier(0.22,1,0.36,1);">
+      <div style="width:64px; height:64px; background:var(--green-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 style="font-family:'Bebas Neue',cursive; font-size:2rem; color:var(--text); margin-bottom:10px; letter-spacing:0.02em;">Request Sent!</h3>
+      <p style="font-size:14px; color:var(--muted); line-height:1.65; margin-bottom:24px;">
+        Thanks <strong id="modal-name"></strong>! I've received your request and will reach out within <strong>24 hours</strong> to discuss your automation project.
+      </p>
+      <button onclick="closeModal()" class="btn-primary" style="width:100%; justify-content:center;">
+        Done ✓
+      </button>
+    </div>
+  </div>
 
   <!-- ===== STICKY CTA ===== -->
   <div id="cta-bar">
@@ -856,6 +877,8 @@ async function runAnalysis() {
 }
 
 // ===== RENDER =====
+let selectedOpp = null;
+
 function renderReport(data) {
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('report-state').style.display  = 'block';
@@ -867,56 +890,80 @@ function renderReport(data) {
   (data.opportunities || []).forEach((opp, i) => {
     const card = document.createElement('div');
     card.className = 'opp-card';
+    card.id = `opp-card-${i}`;
     card.style.animationDelay = `${i * 0.1}s`;
+    card.style.cursor = 'pointer';
     const tools = (opp.tools || []).map(t => `<span class="tool-badge">${t}</span>`).join('');
-    const oppData = encodeURIComponent(JSON.stringify(opp));
     card.innerHTML = `
-      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div class="num-badge">${String(i+1).padStart(2,'0')}</div>
-          <h3 style="font-size:14.5px; font-weight:600; color:var(--text); line-height:1.4;">${escHtml(opp.pain || 'Manual process identified')}</h3>
+      <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:12px;">
+        <input type="radio" name="opp" id="radio-${i}" value="${i}"
+          style="width:18px; height:18px; accent-color:var(--amber); flex-shrink:0; margin-top:2px; cursor:pointer;"
+          onchange="selectOpp(${i})">
+        <div style="flex:1;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px;">
+            <label for="radio-${i}" style="font-size:14.5px; font-weight:600; color:var(--text); line-height:1.4; cursor:pointer;">${escHtml(opp.pain || 'Manual process identified')}</label>
+            <span class="time-badge" style="flex-shrink:0;">${opp.timeSaved || '—'}</span>
+          </div>
+          <p style="font-size:13.5px; color:var(--muted); line-height:1.65; margin-bottom:10px;">${escHtml(opp.solution || 'This can be automated.')}</p>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">${tools}</div>
         </div>
-        <span class="time-badge" style="flex-shrink:0;">${opp.timeSaved || '—'}</span>
-      </div>
-      <p style="font-size:13.5px; color:var(--muted); line-height:1.65; margin-bottom:12px; padding-left:38px;">${escHtml(opp.solution || 'This can be automated.')}</p>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; padding-left:38px; margin-bottom:14px;">${tools}</div>
-      <div style="padding-left:38px;">
-        <button onclick="buildThis('${oppData}')"
-          style="font-size:13px; font-weight:600; color:var(--amber); background:var(--amber-light); border:1.5px solid rgba(217,119,6,0.25); padding:8px 16px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
-          onmouseover="this.style.background='#fde68a'; this.style.borderColor='var(--amber)';"
-          onmouseout="this.style.background='var(--amber-light)'; this.style.borderColor='rgba(217,119,6,0.25)';">
-          Build This →
-        </button>
       </div>
     `;
+    card.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'INPUT') {
+        document.getElementById(`radio-${i}`).checked = true;
+        selectOpp(i);
+      }
+    });
     list.appendChild(card);
   });
 
+  document.getElementById('select-hint').style.display = 'block';
   document.getElementById('cta-bar').classList.add('visible');
+  window._reportOpps = data.opportunities || [];
 }
 
-function buildThis(oppDataEncoded) {
-  const opp = JSON.parse(decodeURIComponent(oppDataEncoded));
-  const tools = (opp.tools || []).join(', ');
-  const message = `Hi Raffy, I just ran the AutoAudit tool and I want you to build this for me:\n\n📌 ${opp.pain}\n💡 ${opp.solution}\n🛠 Tools: ${tools}\n⏱ Estimated savings: ${opp.timeSaved}`;
+function selectOpp(i) {
+  selectedOpp = window._reportOpps[i];
+  // Highlight selected card
+  window._reportOpps.forEach((_, idx) => {
+    const c = document.getElementById(`opp-card-${idx}`);
+    if (c) c.style.borderColor = idx === i ? 'var(--amber)' : 'var(--border)';
+  });
+  // Enable book button
+  const btn = document.getElementById('book-consult-btn');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.style.cursor = 'pointer';
+}
 
-  // Send to Formspree
+function bookConsultation() {
+  if (!selectedOpp) return;
+  const tools = (selectedOpp.tools || []).join(', ');
+
+  // Fire Formspree
   fetch('https://formspree.io/f/myklgkwp', {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name:               state.name,
-      email:              state.email,
-      selected_opportunity: opp.pain,
-      solution:           opp.solution,
-      tools:              tools,
-      time_saved:         opp.timeSaved,
-      type:               'opportunity_selected'
+      name:                 state.name,
+      email:                state.email,
+      type:                 'consultation_request',
+      selected_opportunity: selectedOpp.pain,
+      solution:             selectedOpp.solution,
+      tools:                tools,
+      time_saved:           selectedOpp.timeSaved
     })
   }).catch(() => {});
 
-  // Open WhatsApp
-  window.open(`https://wa.me/639975688363?text=${encodeURIComponent(message)}`, '_blank');
+  // Show modal
+  document.getElementById('modal-name').textContent = state.name || 'there';
+  const modal = document.getElementById('success-modal');
+  modal.style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('success-modal').style.display = 'none';
 }
 
 function showError() {
