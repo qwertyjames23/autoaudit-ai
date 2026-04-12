@@ -32,4 +32,4 @@ A free AI-powered automation audit tool for businesses. Describe your workflow a
 
 ## Built By
 
-[Raffy Adams](https://raffy-portfolio.netlify.app) — AI Automation Specialist & Full-Stack Developer
+[Raffy James Adams](https://raffy-portfolio.netlify.app) — AI Automation Specialist & Full-Stack Developer
