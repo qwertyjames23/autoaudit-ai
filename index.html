@@ -930,27 +930,6 @@ function selectOpp(i) {
 
 function bookConsultation() {
   if (!selectedOpp) return;
-  const tools = (selectedOpp.tools || []).join(', ');
-
-  // Fire Formspree
-  fetch('https://formspree.io/f/myklgkwp', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name:                 state.name,
-      email:                state.email,
-      industry:             state.industry,
-      team_size:            state.teamSize,
-      workflow:             state.workflow,
-      type:                 'consultation_request',
-      selected_opportunity: selectedOpp.pain,
-      solution:             selectedOpp.solution,
-      tools:                tools,
-      time_saved:           selectedOpp.timeSaved
-    })
-  }).catch(() => {});
-
-  // Open WhatsApp with context
   const msg = `Hi Raffy, I just ran the AutoAudit tool and I'd like to discuss automating my business workflow.\n\nSelected opportunity: ${selectedOpp.pain}\nSolution: ${selectedOpp.solution}\nEstimated time saved: ${selectedOpp.timeSaved}`;
   window.open('https://wa.me/639975688363?text=' + encodeURIComponent(msg), '_blank');
 }
