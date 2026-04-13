@@ -716,40 +716,13 @@
     </div>
   </div>
 
-  <!-- ===== CONTACT FORM MODAL ===== -->
-  <div id="contact-modal" onclick="if(event.target===this)closeContactModal()" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; padding:24px;">
-    <div style="background:white; border-radius:20px; padding:36px 32px; max-width:420px; width:100%; box-shadow:0 24px 64px rgba(0,0,0,0.2); animation:fadeUp 0.3s cubic-bezier(0.22,1,0.36,1);">
-      <h3 style="font-family:'Bebas Neue',cursive; font-size:2rem; color:var(--text); margin-bottom:6px; letter-spacing:0.02em;">Book Free Consultation</h3>
-      <p style="font-size:13px; color:var(--muted); margin-bottom:22px; line-height:1.55;">Fill in your details and I'll reach out within 24 hours.</p>
-      <form id="contact-form" onsubmit="submitContact(event)">
-        <div style="margin-bottom:14px;">
-          <label style="display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px;">Your name</label>
-          <input type="text" id="contact-name" class="input-field" placeholder="Jane Smith" required autocomplete="name">
-        </div>
-        <div style="margin-bottom:14px;">
-          <label style="display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px;">Work email</label>
-          <input type="email" id="contact-email" class="input-field" placeholder="jane@yourbusiness.com" required autocomplete="email">
-        </div>
-        <div style="margin-bottom:20px;">
-          <label style="display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px;">What would you like to automate? <span style="font-weight:400; color:var(--muted);">(optional)</span></label>
-          <textarea id="contact-message" class="input-field" placeholder="Briefly describe your workflow..." rows="3" style="resize:vertical;"></textarea>
-        </div>
-        <div id="contact-error" class="error-box" style="display:none; margin-bottom:14px;"></div>
-        <div style="display:flex; gap:10px;">
-          <button type="button" onclick="closeContactModal()" style="flex:1; padding:12px; border:1px solid var(--border); border-radius:10px; background:white; color:var(--muted); font-size:14px; font-weight:600; cursor:pointer;">Cancel</button>
-          <button type="submit" id="contact-submit" class="btn-primary" style="flex:2; justify-content:center;">Send Request →</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- ===== STICKY CTA ===== -->
   <div id="cta-bar">
     <div>
       <p style="font-size:13.5px; font-weight:600; color:var(--text); margin-bottom:2px;">Want this actually built?</p>
       <p style="font-size:12px; color:var(--muted);">Custom automations · avg. 10–40 hrs/week saved · free consult</p>
     </div>
-    <button onclick="openContactModal()" class="btn-primary" style="white-space:nowrap; flex-shrink:0;">
+    <button onclick="bookConsultationForm()" class="btn-primary" style="white-space:nowrap; flex-shrink:0;">
       📋 Book Free Consultation →
     </button>
   </div>
@@ -993,47 +966,14 @@ function closeModal() {
   document.getElementById('success-modal').style.display = 'none';
 }
 
-function openContactModal() {
-  document.getElementById('contact-form').reset();
-  document.getElementById('contact-error').style.display = 'none';
-  const btn = document.getElementById('contact-submit');
-  btn.disabled = false;
-  btn.textContent = 'Send Request →';
-  document.getElementById('contact-modal').style.display = 'flex';
-}
-
-function closeContactModal() {
-  document.getElementById('contact-modal').style.display = 'none';
-}
-
-async function submitContact(e) {
-  e.preventDefault();
-  const name  = document.getElementById('contact-name').value.trim();
-  const email = document.getElementById('contact-email').value.trim();
-  const msg   = document.getElementById('contact-message').value.trim();
-  const btn   = document.getElementById('contact-submit');
-  const errEl = document.getElementById('contact-error');
-
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  errEl.style.display = 'none';
-
-  try {
-    const res = await fetch('https://formspree.io/f/myklgkwp', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message: msg, type: 'footer_consultation' }),
-    });
-    if (!res.ok) throw new Error();
-    closeContactModal();
-    document.getElementById('modal-name').textContent = name;
-    document.getElementById('success-modal').style.display = 'flex';
-  } catch {
-    errEl.textContent = 'Something went wrong. Please try again.';
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Send Request →';
-  }
+async function bookConsultationForm() {
+  fetch('https://formspree.io/f/myklgkwp', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: state.name, email: state.email, industry: state.industry, team_size: state.teamSize, workflow: state.workflow, type: 'footer_consultation' }),
+  }).catch(() => {});
+  document.getElementById('modal-name').textContent = state.name;
+  document.getElementById('success-modal').style.display = 'flex';
 }
 
 function showError() {
