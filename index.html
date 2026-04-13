@@ -942,7 +942,18 @@ async function bookConsultationForm() {
   fetch('https://formspree.io/f/myklgkwp', {
     method: 'POST',
     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: state.name, email: state.email, industry: state.industry, team_size: state.teamSize, workflow: state.workflow, type: 'footer_consultation' }),
+    body: JSON.stringify({
+      name:                 state.name,
+      email:                state.email,
+      industry:             state.industry,
+      team_size:            state.teamSize,
+      workflow:             state.workflow,
+      type:                 'footer_consultation',
+      selected_opportunity: selectedOpp ? selectedOpp.pain : null,
+      solution:             selectedOpp ? selectedOpp.solution : null,
+      tools:                selectedOpp ? (selectedOpp.tools || []).join(', ') : null,
+      time_saved:           selectedOpp ? selectedOpp.timeSaved : null,
+    }),
   }).catch(() => {});
   document.getElementById('modal-name').textContent = state.name;
   document.getElementById('success-modal').style.display = 'flex';
