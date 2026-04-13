@@ -836,13 +836,6 @@ async function submitLead(e) {
   btn.disabled = true;
   btn.textContent = 'Generating...';
 
-  // Fire and forget
-  fetch('https://formspree.io/f/myklgkwp', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: state.name, email: state.email, industry: state.industry, teamSize: state.teamSize, workflow: state.workflow })
-  }).catch(() => {});
-
   goToStep(4);
   runAnalysis();
 }
